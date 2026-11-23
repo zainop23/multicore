@@ -266,7 +266,7 @@ It should find index 49 because the array contains `i + 1`.
 Use a shared protected flag, check it during searching, and coordinate access
 to the flag with the mutex or an atomic operation.
 
-## 5. Questions from Programs 4-7
+## 5. Questions from Programs 4-5
 
 ### 72. Why does Program 4 protect the bank balance with a mutex?
 The balance check and update must be one atomic critical operation.
@@ -297,150 +297,73 @@ It stores merged values temporarily before copying them back into `arr`.
 The comparison uses `<` rather than `<=`, so equal values from the right half
 may be selected first; therefore stability is not guaranteed.
 
-### 81. What is the producer-consumer problem in Program 6?
-One thread produces tasks and another consumes them through a bounded shared
-buffer.
+## 6. Questions from Programs 8-9
 
-### 82. Why are `not_full` and `not_empty` used in Program 6?
-They make the producer wait when the buffer is full and the consumer wait when
-it is empty.
-
-### 83. Why is the buffer implemented as a circular buffer?
-Modulo indexing reuses buffer positions efficiently after they are consumed.
-
-### 84. What does `count` represent in Program 6?
-It represents the current number of tasks stored in the buffer.
-
-### 85. Why does Program 6 use `while` around `pthread_cond_wait()`?
-The condition must be rechecked after waking while holding the mutex.
-
-### 86. What is special about Program 7?
-It is a continuous producer-consumer example with a maximum bread count of
-five and no termination condition.
-
-### 87. Why does Program 7 not finish normally?
-Both producer and consumer use infinite loops, so `pthread_join()` waits
-forever.
-
-### 88. What change would make Program 7 terminate?
-Use a finite number of items and a shutdown or completion flag communicated
-under the mutex.
-
-### 89. Why does Program 7 use one condition variable for two conditions?
-The same condition variable can wake either side, but each side must recheck
-its own condition in a `while` loop.
-
-## 6. Questions from Programs 8-11
-
-### 90. What does Program 8 compare?
+### 81. What does Program 8 compare?
 It compares sequential and OpenMP parallel array-summation results and times.
 
-### 91. Why does Program 8 use `reduction`?
+### 82. Why does Program 8 use `reduction`?
 Each thread accumulates privately and OpenMP combines the partial sums safely.
 
-### 92. Why should both sums in Program 8 be equal?
+### 83. Why should both sums in Program 8 be equal?
 They use the same array values and addition is associative for these integer
 values.
 
-### 93. Why might the measured parallel time not be lower?
+### 84. Why might the measured parallel time not be lower?
 The array may be too small for the machine, and thread and scheduling overhead
 may exceed the saved computation time.
 
-### 94. What is the purpose of the tasks in Program 9?
+### 85. What is the purpose of the tasks in Program 9?
 They represent independent image-processing operations such as blurring,
 sharpening, contrast adjustment, and resizing.
 
-### 95. Why is `single` used in Program 9?
+### 86. Why is `single` used in Program 9?
 Only one thread should create each image-processing task.
 
-### 96. Why can Program 9 print task messages in different orders?
+### 87. Why can Program 9 print task messages in different orders?
 The tasks are independent and are scheduled nondeterministically.
 
-### 97. What issue should be considered after creating tasks in Program 9?
+### 88. What issue should be considered after creating tasks in Program 9?
 A real program should use a suitable parallel region and `taskwait` when later
 work depends on task completion; task lifetime and synchronization must be
 made explicit.
 
-### 98. What deadlock pattern is demonstrated by Program 10?
-Thread 0 locks `m1` and waits for `m2`, while thread 1 locks `m2` and waits for
-`m1`, forming circular wait.
-
-### 99. How does Program 10 avoid waiting forever?
-It uses `pthread_mutex_timedlock()` with a two-second absolute deadline.
-
-### 100. What happens after a timeout in Program 10?
-The thread reports the timeout and releases the first mutex it owns.
-
-### 101. Is a timeout the same as preventing deadlock?
-No. It bounds the waiting time and permits recovery, but a consistent lock
-ordering is a better prevention strategy.
-
-### 102. How can Program 10 be redesigned to prevent the deadlock?
-Make every thread acquire `m1` before `m2`, or use a single higher-level lock.
-
-### 103. What is work stealing in Program 11?
-An idle worker takes an available task from another worker's queue.
-
-### 104. Why does each queue in Program 11 have its own mutex?
-It allows safe access to that queue and reduces unnecessary contention between
-unrelated queues.
-
-### 105. What does `pop(id)` do in Program 11?
-It removes one task from the top of worker `id`'s queue, if one is available.
-
-### 106. How are initial tasks distributed in Program 11?
-Tasks 1-7 initially go to worker 0; tasks 8-10 go to workers 1, 2, and 3.
-
-### 107. Why is work stealing useful?
-It improves load balance when some workers finish their own queues earlier.
-
-### 108. What is a possible limitation of Program 11's stealing loop?
-Workers stop when no task is immediately found, so dynamically arriving tasks
-would require an explicit completion protocol or coordination mechanism.
-
-### 109. Why are mutexes needed while stealing?
-The thief and the owner may access the same queue concurrently.
-
-### 110. What is the expected output property of Programs 6 and 11?
-Every produced or initialized task should eventually be consumed or processed
-exactly once.
-
 ## 7. Common Follow-up Questions
 
-### 111. What is the difference between a mutex and a semaphore?
+### 89. What is the difference between a mutex and a semaphore?
 A mutex provides ownership-based mutual exclusion; a semaphore is a counter
 that controls access to one or more units of a resource.
 
-### 112. What is an atomic operation?
+### 90. What is an atomic operation?
 It completes indivisibly from the perspective of other threads.
 
-### 113. When should synchronization be avoided?
+### 91. When should synchronization be avoided?
 It should be minimized when data is read-only or work is completely
 independent, because synchronization adds overhead.
 
-### 114. What is granularity in parallel programming?
+### 92. What is granularity in parallel programming?
 Granularity is the amount of computation assigned to each parallel task.
 
-### 115. What is fine-grained parallelism?
+### 93. What is fine-grained parallelism?
 It uses many small tasks, which may improve balancing but increases
 synchronization and scheduling overhead.
 
-### 116. What is coarse-grained parallelism?
+### 94. What is coarse-grained parallelism?
 It uses fewer, larger tasks, reducing overhead but potentially causing load
 imbalance.
 
-### 117. Why should shared data be minimized?
+### 95. Why should shared data be minimized?
 Less shared data reduces races, locking, cache-coherence traffic, and debugging
 difficulty.
 
-### 118. What is nondeterminism?
+### 96. What is nondeterminism?
 Nondeterminism means that execution order or output order can vary between runs
 even when the program is correct.
 
-### 119. How should a parallel program be tested?
+### 97. How should a parallel program be tested?
 Check correctness against a sequential reference, run with different thread
 counts, and measure performance over repeated runs.
 
-### 120. What is the most important rule when parallelizing a loop?
+### 98. What is the most important rule when parallelizing a loop?
 Iterations must be independent, or all dependencies must be synchronized
 correctly.
